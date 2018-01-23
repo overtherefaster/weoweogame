@@ -5,4 +5,11 @@ package sophistry.weoweogame.data;
  */
 
 public class Player {
+
+    String name;
+    String id;
+    PlayerType type;
+
+    int numberOfWins;
+    int totalMatches;
 }
