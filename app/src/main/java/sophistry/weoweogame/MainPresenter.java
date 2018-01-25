@@ -14,7 +14,7 @@ public class MainPresenter implements MainContract.Presenter {
 
     MainContract.View view;
     Game model;
-    Pair<Integer,Integer> initialTouch;
+    Pair<Integer,Integer> currentTouch;
 
     public MainPresenter (@NonNull Game game, @NonNull MainContract.View view) {
         this.model = game;
@@ -28,12 +28,25 @@ public class MainPresenter implements MainContract.Presenter {
 
         switch (state) {
             case EMPTY:
+                currentTouch = new Pair<>(row,col);
                 view.highlightCell(row, col);
-                initialTouch = new Pair<>(row,col);
                 break;
-            case PLAYER_O:
+            default:
                 break;
-            case PLAYER_X:
+        }
+    }
+
+    @Override
+    public void onCellChanged(int row, int col) {
+        MarkType state = model.getCellState(row, col);
+
+        switch (state) {
+            case EMPTY:
+                // Check if user has moved to another cell
+                if (!(row == currentTouch.first && col == currentTouch.second)) {
+                    currentTouch = new Pair<>(row, col);
+                    view.highlightCell(row, col);
+                }
                 break;
             default:
                 break;
@@ -43,33 +56,21 @@ public class MainPresenter implements MainContract.Presenter {
 
     @Override
     public void onCellFinalized(int row, int col) {
-        MarkType state = model.getCellState(row, col);
 
-        switch (state) {
-            case EMPTY:
-                if (row == initialTouch.first && col == initialTouch.second) {
-                    MarkType movedPlayer = model.processTurn(row, col);
-                    if (movedPlayer == MarkType.PLAYER_O) {
-                        view.markCellWithO(row, col);
-                    }
-                    else {
-                        view.markCellWithX(row, col);
-                    }
-                }
-                else {
-                    view.unhighlightCell(initialTouch.first, initialTouch.second);
-                }
+        MarkType movedPlayer = model.processTurn(row, col);
 
-                // update model with X or O depending on turn
-                // update view with X or O depending on turn
-                break;
-            case PLAYER_O:
-                break;
-            case PLAYER_X:
-                break;
-            default:
-                break;
+        if (movedPlayer == MarkType.PLAYER_O) {
+            view.markCellWithO(row, col);
         }
+        else if (movedPlayer == MarkType.PLAYER_X) {
+            view.markCellWithX(row, col);
+        }
+
+        view.cancelCellHighlight();
+        //view.unhighlightCell(currentTouch.first, currentTouch.second);
+        // update model with X or O depending on turn
+        // update view with X or O depending on turn
+
 
     }
 

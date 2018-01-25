@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="font_size_XO">18sp</dimen>
+    <dimen name="font_size_XO">48sp</dimen>
 </resources>

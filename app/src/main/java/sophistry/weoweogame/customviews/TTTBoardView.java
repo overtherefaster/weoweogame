@@ -11,11 +11,13 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.util.Pair;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import sophistry.weoweogame.R;
 import sophistry.weoweogame.data.Cell;
+import sophistry.weoweogame.data.MarkType;
 
 /**
  * Created by Vincent on 1/22/2018.
@@ -29,15 +31,15 @@ public class TTTBoardView extends View {
     private TextPaint paintForX;
 
     private final int TOTAL_CELLS = 9;
+    private int[][] board = new int[3][3];
     private Rect[] cells = new Rect[TOTAL_CELLS];
 
     private final float X_PARTITION_FACTOR = 1/3F;
     private final float Y_PARTITION_FACTOR = 1/3F;
 
-    private final char MARKER_O = 'O';
-    private final char MARKER_X = 'X';
-
     private boolean isTouched = false;
+    private boolean pendingX = false;
+    private boolean pendingO = false;
     private int touchedCell;
 
     public TTTBoardView(Context context) {
@@ -171,6 +173,14 @@ public class TTTBoardView extends View {
             drawHighlightedCell(canvas);
         }
 
+        if (pendingO) {
+            drawO(canvas);
+        }
+
+        if (pendingX) {
+            drawX(canvas);
+        }
+
     }
 
     @Override
@@ -184,7 +194,7 @@ public class TTTBoardView extends View {
     // UP act according to state (cell state ~> which player's turn it is)
 
 
-    private int getCellIndex (int x, int y) {
+    private int getCellIndexFromXY (int x, int y) {
 
         for (int i = 0; i < cells.length; i++) {
             if (cells[i].contains(x, y)) {
@@ -194,8 +204,12 @@ public class TTTBoardView extends View {
         return -1;
     }
 
+    private int getCellIndexFromRowCol (int row, int col) {
+        return (row * 3) + col;
+    }
+
     public Pair<Integer,Integer> getCellRowCol (int x, int y) {
-        int idx = getCellIndex (x, y);
+        int idx = getCellIndexFromXY (x, y);
         return new Pair<>(idx/3, idx%3);
     }
 
@@ -204,36 +218,54 @@ public class TTTBoardView extends View {
                 y >= 0 && y <= getHeight());
     }
 
-    public void drawO (int cellIndex) {
-
+    private void drawO (Canvas canvas) {
+        canvas.drawText("O", cells[touchedCell].exactCenterX(), cells[touchedCell].exactCenterY(), paintForO );
+        pendingO = false;
     }
 
-    public void drawX (int cellIndex) {
-
+    private void drawX (Canvas canvas) {
+        canvas.drawText("X", cells[touchedCell].exactCenterX(), cells[touchedCell].exactCenterY(), paintForX );
+        pendingX = false;
     }
 
-    public void highlightCell (int x, int y) {
-        int cellIndex = getCellIndex(x, y);
 
-        if (cellIndex != -1) {
-            isTouched = true;
-            touchedCell = cellIndex;
-            invalidate(cells[cellIndex]);
+    public void markXO(boolean isO, int row, int col) {
+        int cellIndex = getCellIndexFromRowCol(row, col);
+
+        if (isO) {
+            pendingO = true;
         }
+        else {
+            pendingX = true;
+        }
+        touchedCell = cellIndex;
+        invalidate(cells[cellIndex]);
+    }
+
+    public void highlightCell (int row, int col) {
+        int cellIndex = getCellIndexFromRowCol(row, col);
+
+        isTouched = true;
+        touchedCell = cellIndex;
+        invalidate(cells[cellIndex]);
 
     }
 
-    public void unhighlightCell (int x, int y) {
-        int cellIndex = getCellIndex(x, y);
+    public void unhighlightCell (int row, int col) {
+        int cellIndex = getCellIndexFromRowCol(row, col);
 
-        if (cellIndex != -1) {
-            isTouched = false;
-            invalidate(cells[cellIndex]);
-        }
+        isTouched = false;
+        invalidate(cells[cellIndex]);
+    }
 
+    public void cancelHighlight () {
+        isTouched = false;
+        invalidate();
     }
 
     private void drawHighlightedCell (Canvas canvas) {
+        //System.out.println ("touchedcell = " + touchedCell);
+        //Log.d ("", "[vc_touchedcell]="+touchedCell);
         canvas.drawRect(cells[touchedCell], highlightedCellPaint);
     }
 

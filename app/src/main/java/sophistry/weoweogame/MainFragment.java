@@ -36,20 +36,26 @@ public class MainFragment extends Fragment implements MainContract.View, View.On
         return rootView;
     }
 
-
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
 
-        if (view.getId() == R.id.main_board) {
+        int touchX = (int)motionEvent.getX();
+        int touchY = (int)motionEvent.getY();
+
+        if (view.getId() == R.id.main_board && tttBoardView.withinBoardBounds(touchX, touchY)) {
 
             Pair<Integer, Integer> coords =
-                    tttBoardView.getCellRowCol((int)motionEvent.getX(), (int)motionEvent.getY());
+                    tttBoardView.getCellRowCol(touchX, touchY);
 
             switch (motionEvent.getAction()) {
 
                 case MotionEvent.ACTION_DOWN:
                     //Log.d ("", "[main_board] ACTION_DOWN - row="+coords.first+"/col="+coords.second);
                     presenter.onCellTouched(coords.first, coords.second);
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    presenter.onCellChanged(coords.first, coords.second);
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -62,8 +68,11 @@ public class MainFragment extends Fragment implements MainContract.View, View.On
             }
             return true;
         }
+        else {
+            cancelCellHighlight();
+            return false;
+        }
 
-        return false;
     }
 
 
@@ -79,17 +88,22 @@ public class MainFragment extends Fragment implements MainContract.View, View.On
     }
 
     @Override
+    public void cancelCellHighlight() {
+        tttBoardView.cancelHighlight();
+    }
+
+    @Override
     public void unhighlightCell(int row, int col) {
         tttBoardView.unhighlightCell(row, col);
     }
 
     @Override
     public void markCellWithO(int row, int col) {
-
+        tttBoardView.markXO(true, row, col);
     }
 
     @Override
     public void markCellWithX(int row, int col) {
-
+        tttBoardView.markXO(false, row, col);
     }
 }

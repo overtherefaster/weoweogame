@@ -48,12 +48,16 @@ public class Game {
     }
 
     public MarkType processTurn(int row, int col) {
-        MarkType movingPlayer = currentPlayer.type;
-        markCell(row,col);
-        flipCurrentPlayerTurn();
+        MarkType movingPlayer = null;
 
-        if (gameIsOver()) {
-            handleGameOver();
+        if (isValid(row, col)) {
+            movingPlayer = currentPlayer.type;
+            markCell(row, col);
+            flipCurrentPlayerTurn();
+
+            if (gameIsOver()) {
+                handleGameOver();
+            }
         }
 
         // Return the player type that just moved
@@ -71,6 +75,10 @@ public class Game {
         else {
             currentPlayer = playerOne;
         }
+    }
+
+    private boolean isValid(int row, int col) {
+        return board[row][col].getState() == MarkType.EMPTY && row < board.length && col < board[0].length;
     }
 
     public Cell getCell (int row, int col) {
