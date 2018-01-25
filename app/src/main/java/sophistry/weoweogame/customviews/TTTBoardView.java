@@ -31,16 +31,14 @@ public class TTTBoardView extends View {
     private TextPaint paintForX;
 
     private final int TOTAL_CELLS = 9;
-    private int[][] board = new int[3][3];
-    private Rect[] cells = new Rect[TOTAL_CELLS];
+    private String[][] board = new String[3][3];
+    private Rect[][] cells = new Rect[3][3];
 
     private final float X_PARTITION_FACTOR = 1/3F;
     private final float Y_PARTITION_FACTOR = 1/3F;
 
     private boolean isTouched = false;
-    private boolean pendingX = false;
-    private boolean pendingO = false;
-    private int touchedCell;
+    private Pair<Integer,Integer> touchedPair;
 
     public TTTBoardView(Context context) {
         this(context, null);
@@ -96,16 +94,19 @@ public class TTTBoardView extends View {
         float cellWidth = getWidth() * X_PARTITION_FACTOR;
         float cellHeight = getHeight() * Y_PARTITION_FACTOR;
 
-        int row, col;
+        //int row, col;
 
         for (int i = 0; i < cells.length; i++) {
-            row = i / 3;
-            col = i % 3;
-            cells[i] = new Rect(
-                    (int)(col * cellWidth), // left
-                    (int)(row * cellHeight), // top
-                    (int)((col + 1) * cellWidth), // right
-                    (int)((row + 1) * cellHeight)); // bottom
+            //row = i / 3;
+            //col = i % 3;
+            for (int j = 0; j < cells[0].length; j++) {
+                cells[i][j] = new Rect(
+                            (int)(j * cellWidth), // left
+                            (int)(i * cellHeight), // top
+                            (int)((j + 1) * cellWidth), // right
+                            (int)((i + 1) * cellHeight)); // bottom
+            }
+
         }
     }
 
@@ -168,17 +169,10 @@ public class TTTBoardView extends View {
         super.onDraw(canvas);
         drawVerticalLines(canvas);
         drawHorizontalLines(canvas);
+        drawMarkers(canvas);
 
         if (isTouched) {
             drawHighlightedCell(canvas);
-        }
-
-        if (pendingO) {
-            drawO(canvas);
-        }
-
-        if (pendingX) {
-            drawX(canvas);
         }
 
     }
@@ -188,29 +182,19 @@ public class TTTBoardView extends View {
         return super.performClick();
     }
 
-    // touch event
-    // find which cell
-    // DOWN -> highlight grey (if empty)
-    // UP act according to state (cell state ~> which player's turn it is)
 
 
-    private int getCellIndexFromXY (int x, int y) {
+    public Pair<Integer,Integer> getCellIndexFromXY (int x, int y) {
 
         for (int i = 0; i < cells.length; i++) {
-            if (cells[i].contains(x, y)) {
-                return i;
+            for (int j = 0; j < cells[0].length; j++) {
+                if (cells[i][j].contains(x, y)) {
+                    return new Pair<>(i,j);
+                }
             }
         }
-        return -1;
-    }
 
-    private int getCellIndexFromRowCol (int row, int col) {
-        return (row * 3) + col;
-    }
-
-    public Pair<Integer,Integer> getCellRowCol (int x, int y) {
-        int idx = getCellIndexFromXY (x, y);
-        return new Pair<>(idx/3, idx%3);
+        return new Pair<>(0,0);
     }
 
     public boolean withinBoardBounds (int x, int y) {
@@ -218,44 +202,42 @@ public class TTTBoardView extends View {
                 y >= 0 && y <= getHeight());
     }
 
-    private void drawO (Canvas canvas) {
-        canvas.drawText("O", cells[touchedCell].exactCenterX(), cells[touchedCell].exactCenterY(), paintForO );
-        pendingO = false;
-    }
 
-    private void drawX (Canvas canvas) {
-        canvas.drawText("X", cells[touchedCell].exactCenterX(), cells[touchedCell].exactCenterY(), paintForX );
-        pendingX = false;
+    private void drawMarkers(Canvas canvas) {
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j] != null) {
+                    if (board[i][j].equals("O")) {
+                        canvas.drawText("O", cells[i][j].exactCenterX(), cells[i][j].exactCenterY(), paintForO);
+                    }
+                    else if (board[i][j].equals("X")) {
+                        canvas.drawText("X", cells[i][j].exactCenterX(), cells[i][j].exactCenterY(), paintForX);
+                    }
+                }
+            }
+        }
     }
-
 
     public void markXO(boolean isO, int row, int col) {
-        int cellIndex = getCellIndexFromRowCol(row, col);
-
         if (isO) {
-            pendingO = true;
+            board[row][col] = "O";
         }
         else {
-            pendingX = true;
+            board[row][col] = "X";
         }
-        touchedCell = cellIndex;
-        invalidate(cells[cellIndex]);
     }
 
     public void highlightCell (int row, int col) {
-        int cellIndex = getCellIndexFromRowCol(row, col);
 
         isTouched = true;
-        touchedCell = cellIndex;
-        invalidate(cells[cellIndex]);
+        touchedPair = new Pair<>(row, col);
+        invalidate(cells[row][col]);
 
     }
 
     public void unhighlightCell (int row, int col) {
-        int cellIndex = getCellIndexFromRowCol(row, col);
-
         isTouched = false;
-        invalidate(cells[cellIndex]);
+        invalidate(cells[row][col]);
     }
 
     public void cancelHighlight () {
@@ -266,7 +248,7 @@ public class TTTBoardView extends View {
     private void drawHighlightedCell (Canvas canvas) {
         //System.out.println ("touchedcell = " + touchedCell);
         //Log.d ("", "[vc_touchedcell]="+touchedCell);
-        canvas.drawRect(cells[touchedCell], highlightedCellPaint);
+        canvas.drawRect(cells[touchedPair.first][touchedPair.second], highlightedCellPaint);
     }
 
 

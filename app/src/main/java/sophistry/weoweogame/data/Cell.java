@@ -22,4 +22,12 @@ public class Cell {
     public MarkType getState() {
         return this.state;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Cell) {
+            return this.state == ((Cell)obj).state;
+        }
+        return false;
+    }
 }

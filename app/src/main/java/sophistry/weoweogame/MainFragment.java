@@ -45,7 +45,7 @@ public class MainFragment extends Fragment implements MainContract.View, View.On
         if (view.getId() == R.id.main_board && tttBoardView.withinBoardBounds(touchX, touchY)) {
 
             Pair<Integer, Integer> coords =
-                    tttBoardView.getCellRowCol(touchX, touchY);
+                    tttBoardView.getCellIndexFromXY(touchX, touchY);
 
             switch (motionEvent.getAction()) {
 
@@ -106,4 +106,6 @@ public class MainFragment extends Fragment implements MainContract.View, View.On
     public void markCellWithX(int row, int col) {
         tttBoardView.markXO(false, row, col);
     }
+
+
 }
