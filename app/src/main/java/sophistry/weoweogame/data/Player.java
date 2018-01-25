@@ -8,8 +8,17 @@ public class Player {
 
     String name;
     String id;
-    PlayerType type;
+    MarkType type;
 
     int numberOfWins;
     int totalMatches;
+
+    public Player(String name, String id, MarkType type) {
+        this.name = name;
+        this.id = id;
+        this.type = type;
+
+        numberOfWins = 0;
+        totalMatches = 0;
+    }
 }

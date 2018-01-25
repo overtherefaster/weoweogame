@@ -5,17 +5,21 @@ package sophistry.weoweogame.data;
  */
 
 public class Cell {
-    private CellType state;
+    private MarkType state;
+    private int row;
+    private int col;
 
-    public Cell (CellType state) {
+    public Cell (MarkType state, int row, int col) {
+        this.state = state;
+        this.row = row;
+        this.col = col;
+    }
+
+    public void setState(MarkType state) {
         this.state = state;
     }
 
-    public void setState(CellType state) {
-        this.state = state;
-    }
-
-    public CellType getState() {
+    public MarkType getState() {
         return this.state;
     }
 }

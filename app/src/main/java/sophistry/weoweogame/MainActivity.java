@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import sophistry.weoweogame.data.Game;
 import sophistry.weoweogame.util.ActivityUtils;
 
 /**
@@ -11,6 +12,9 @@ import sophistry.weoweogame.util.ActivityUtils;
  */
 
 public class MainActivity extends AppCompatActivity {
+
+    MainPresenter mainPresenter;
+    Game game;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -23,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
             mainFragment = MainFragment.newInstance();
             ActivityUtils.addFragmentToContainer(getSupportFragmentManager(), mainFragment, R.id.content_container);
         }
+
+        mainPresenter = new MainPresenter(new Game(), mainFragment);
 
     }
 }
