@@ -105,7 +105,7 @@ public class Game {
     private boolean isValid(int row, int col) {
         return board[row][col].getState() == MarkType.EMPTY && row < board.length && col < board[0].length;
     }
-    
+
     public MarkType getCellState (int row, int col) {
         return board[row][col].getState();
     }
